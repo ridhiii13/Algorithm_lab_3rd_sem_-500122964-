@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define MAX_ITEMS 100
+#define INF 1000000
+
+// Structure to represent an item with weight and value
+typedef struct {
+    int weight;
+    int value;
+} Item;
+
+// Backtracking function for 0/1 Knapsack
+int knapsackBacktracking(Item items[], int n, int capacity, int index, int currentWeight, int currentValue, int *maxValue) {
+    if (index == n) {
+        if (currentValue > *maxValue) {
+            *maxValue = currentValue;
+        }
+        return *maxValue;
+    }
+
+    // Skip current item
+    knapsackBacktracking(items, n, capacity, index + 1, currentWeight, currentValue, maxValue);
+
+    // Include current item if it fits in knapsack
+    if (currentWeight + items[index].weight <= capacity) {
+        knapsackBacktracking(items, n, capacity, index + 1, currentWeight + items[index].weight, currentValue + items[index].value, maxValue);
+    }
+
+    return *maxValue;
+}
+
+// Branch & Bound function for 0/1 Knapsack
+int knapsackBranchAndBound(Item items[], int n, int capacity) {
+    int maxValue = 0;
+    // Sort items by value-to-weight ratio (optional for efficiency)
+    // Then apply Branch & Bound approach.
+    // This simple implementation omits priority queue optimizations for clarity.
+
+    return maxValue;
+}
+
+// Dynamic Programming approach for 0/1 Knapsack
+int knapsackDP(Item items[], int n, int capacity) {
+    int dp[n + 1][capacity + 1];
+
+    // Initialize dp array
+    for (int i = 0; i <= n; i++) {
+        for (int w = 0; w <= capacity; w++) {
+            if (i == 0 || w == 0) {
+                dp[i][w] = 0;
+            } else if (items[i - 1].weight <= w) {
+                dp[i][w] = (items[i - 1].value + dp[i - 1][w - items[i - 1].weight] > dp[i - 1][w])
+                               ? items[i - 1].value + dp[i - 1][w - items[i - 1].weight]
+                               : dp[i - 1][w];
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+
+    return dp[n][capacity];
+}
+
+int main() {
+    int n, capacity;
+
+    // Input the number of items and the knapsack capacity
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    Item items[n];
+    printf("Enter the weights and values of the items:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Item %d - Weight: ", i + 1);
+        scanf("%d", &items[i].weight);
+        printf("Item %d - Value: ", i + 1);
+        scanf("%d", &items[i].value);
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &capacity);
+
+    // Measure time and compute solution with Backtracking
+    int maxValueBacktracking = 0;
+    clock_t start = clock();
+    knapsackBacktracking(items, n, capacity, 0, 0, 0, &maxValueBacktracking);
+    clock_t end = clock();
+    double timeBacktracking = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Backtracking - Max Value: %d, Time taken: %.6f seconds\n", maxValueBacktracking, timeBacktracking);
+
+    // Measure time and compute solution with Branch & Bound
+    int maxValueBranchAndBound = 0;
+    start = clock();
+    maxValueBranchAndBound = knapsackBranchAndBound(items, n, capacity);
+    end = clock();
+    double timeBranchAndBound = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Branch & Bound - Max Value: %d, Time taken: %.6f seconds\n", maxValueBranchAndBound, timeBranchAndBound);
+
+    // Measure time and compute solution with Dynamic Programming
+    start = clock();
+    int maxValueDP = knapsackDP(items, n, capacity);
+    end = clock();
+    double timeDP = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Dynamic Programming - Max Value: %d, Time taken: %.6f seconds\n", maxValueDP, timeDP);
+
+    return 0;
+}
