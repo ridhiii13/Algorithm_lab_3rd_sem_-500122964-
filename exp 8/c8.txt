@@ -1,0 +1,75 @@
+#include <stdio.h>
+
+#define MAX 20
+
+// Global variables
+int solution[MAX], found = 0;
+
+// Function to print the current solution subset
+void printSubset(int solution[], int n) {
+    printf("{ ");
+    for (int i = 0; i < n; i++) {
+        if (solution[i]) {
+            printf("%d ", solution[i]);
+        }
+    }
+    printf("}\n");
+}
+
+// Recursive function to find subsets that sum to the target
+void sumOfSubsets(int set[], int size, int index, int sum, int target) {
+    // Base case: if subset sum is equal to target, print it
+    if (sum == target) {
+        printSubset(solution, size);
+        found = 1;
+        return;
+    }
+
+    // If the subset sum exceeds the target or we reach end, return
+    if (sum > target || index == size) {
+        return;
+    }
+
+    // Include the current element and recurse
+    solution[index] = set[index];
+    sumOfSubsets(set, size, index + 1, sum + set[index], target);
+
+    // Exclude the current element and recurse
+    solution[index] = 0;
+    sumOfSubsets(set, size, index + 1, sum, target);
+}
+
+int main() {
+    int n, target;
+
+    // Input set size
+    printf("Enter the number of elements in the set: ");
+    scanf("%d", &n);
+
+    int set[MAX];
+    
+    // Input set elements
+    printf("Enter the elements of the set:\n");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &set[i]);
+    }
+
+    // Input target sum
+    printf("Enter the target sum: ");
+    scanf("%d", &target);
+
+    // Initialize solution array to zero
+    for (int i = 0; i < n; i++) {
+        solution[i] = 0;
+    }
+
+    // Find and print all subsets
+    printf("Subsets with the sum %d are:\n", target);
+    sumOfSubsets(set, n, 0, 0, target);
+
+    if (!found) {
+        printf("No subset found with the given sum.\n");
+    }
+
+    return 0;
+}
