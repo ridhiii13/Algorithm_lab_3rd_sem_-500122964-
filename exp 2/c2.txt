@@ -2,131 +2,57 @@
 #include <stdlib.h>
 #include <time.h>
 
-// Function Prototypes
-void mergeSort(int arr[], int l, int r);
+#define MAX_SIZE 1000
+
+// Function prototypes
+void mergeSort(int arr[], int left, int right);
+void merge(int arr[], int left, int mid, int right);
 void quickSort(int arr[], int low, int high);
-void merge(int arr[], int l, int m, int r);
 int partition(int arr[], int low, int high);
-void printArray(int arr[], int size);
-void copyArray(int src[], int dest[], int size);
 
-int main() {
-    int size;
-    printf("Enter the number of elements: ");
-    scanf("%d", &size);
-    
-    int arr[size], copy[size];
-    srand(time(0));
-    
-    // Fill the array with random values
-    for (int i = 0; i < size; i++) {
-        arr[i] = rand() % 1000;  // Random numbers from 0 to 999
-    }
-    
-    // Copy array for fair comparison
-    copyArray(arr, copy, size);
-
-    // Measure time taken by Merge Sort
-    clock_t start = clock();
-    mergeSort(arr, 0, size - 1);
-    clock_t end = clock();
-    double mergeSortTime = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Merge Sort completed in %.6f seconds.\n", mergeSortTime);
-
-    // Measure time taken by Quick Sort
-    start = clock();
-    quickSort(copy, 0, size - 1);
-    end = clock();
-    double quickSortTime = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Quick Sort completed in %.6f seconds.\n", quickSortTime);
-    
-    // Display sorted array
-    printf("Sorted array (Merge Sort result):\n");
-    printArray(arr, size);
-
-    return 0;
-}
-
-// Function to copy array
-void copyArray(int src[], int dest[], int size) {
-    for (int i = 0; i < size; i++) {
-        dest[i] = src[i];
+// Merge Sort implementation
+void mergeSort(int arr[], int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
     }
 }
 
-// Merge Sort function
-void mergeSort(int arr[], int l, int r) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        
-        // Sort first and second halves
-        mergeSort(arr, l, m);
-        mergeSort(arr, m + 1, r);
-        
-        merge(arr, l, m, r);
-    }
-}
-
-// Merge function used in Merge Sort
-void merge(int arr[], int l, int m, int r) {
-    int n1 = m - l + 1;
-    int n2 = r - m;
+void merge(int arr[], int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
     int L[n1], R[n2];
-    
-    // Copy data to temporary arrays L[] and R[]
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[l + i];
-    for (int j = 0; j < n2; j++)
-        R[j] = arr[m + 1 + j];
-    
-    // Merge the temp arrays back into arr[l..r]
-    int i = 0, j = 0, k = l;
+
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = left;
     while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            arr[k] = L[i];
-            i++;
-        } else {
-            arr[k] = R[j];
-            j++;
-        }
-        k++;
+        if (L[i] <= R[j]) arr[k++] = L[i++];
+        else arr[k++] = R[j++];
     }
-    
-    // Copy the remaining elements of L[], if any
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
-    }
-    
-    // Copy the remaining elements of R[], if any
-    while (j < n2) {
-        arr[k] = R[j];
-        j++;
-        k++;
-    }
+    while (i < n1) arr[k++] = L[i++];
+    while (j < n2) arr[k++] = R[j++];
 }
 
-// Quick Sort function
+// Quick Sort implementation
 void quickSort(int arr[], int low, int high) {
     if (low < high) {
         int pi = partition(arr, low, high);
-        
-        // Separately sort elements before and after partition
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
     }
 }
 
-// Partition function used in Quick Sort
 int partition(int arr[], int low, int high) {
-    int pivot = arr[high];  // pivot
-    int i = (low - 1);  // Index of smaller element
-    
+    int pivot = arr[high];
+    int i = (low - 1);
+
     for (int j = low; j <= high - 1; j++) {
-        // If current element is smaller than or equal to pivot
-        if (arr[j] <= pivot) {
-            i++;  // increment index of smaller element
+        if (arr[j] < pivot) {
+            i++;
             int temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
@@ -138,10 +64,48 @@ int partition(int arr[], int low, int high) {
     return (i + 1);
 }
 
-// Function to print the array
+// Function to print an array
 void printArray(int arr[], int size) {
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++)
         printf("%d ", arr[i]);
-    }
     printf("\n");
+}
+
+int main() {
+    int n;
+    printf("Enter the number of elements: ");
+    scanf("%d", &n);
+    if (n > MAX_SIZE) {
+        printf("Maximum allowed size is %d\n", MAX_SIZE);
+        return 1;
+    }
+
+    int arr1[MAX_SIZE], arr2[MAX_SIZE];
+    printf("Enter %d elements:\n", n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr1[i]);
+        arr2[i] = arr1[i];  // Copy arr1 to arr2 for fair comparison
+    }
+
+    // Measure time for Merge Sort
+    clock_t start = clock();
+    mergeSort(arr1, 0, n - 1);
+    clock_t end = clock();
+    double time_merge_sort = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    printf("Sorted array with Merge Sort: ");
+    printArray(arr1, n);
+    printf("Merge Sort Time: %f seconds\n", time_merge_sort);
+
+    // Measure time for Quick Sort
+    start = clock();
+    quickSort(arr2, 0, n - 1);
+    end = clock();
+    double time_quick_sort = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    printf("Sorted array with Quick Sort: ");
+    printArray(arr2, n);
+    printf("Quick Sort Time: %f seconds\n", time_quick_sort);
+
+    return 0;
 }
