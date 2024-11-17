@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef struct {
     int weight;
@@ -49,32 +50,36 @@ int knapsackDP(Item items[], int n, int capacity) {
 }
 
 int main() {
-    int n, capacity;
+    // Predefined input
+    int n = 4;  // Number of items
+    int capacity = 5;  // Knapsack capacity
 
-    // Input number of items and knapsack capacity
-    printf("Enter the number of items: ");
-    scanf("%d", &n);
-    printf("Enter the capacity of the knapsack: ");
-    scanf("%d", &capacity);
+    // Predefined items with weights and values
+    Item items[] = {
+        {2, 12},  // Item 1: weight = 2, value = 12
+        {1, 10},  // Item 2: weight = 1, value = 10
+        {3, 20},  // Item 3: weight = 3, value = 20
+        {4, 25}   // Item 4: weight = 4, value = 25
+    };
 
-    Item items[n];
-
-    // Input weights and values of items
-    printf("Enter weight and value of each item:\n");
-    for (int i = 0; i < n; i++) {
-        printf("Item %d - Weight: ", i + 1);
-        scanf("%d", &items[i].weight);
-        printf("Item %d - Value: ", i + 1);
-        scanf("%d", &items[i].value);
-    }
-
-    // Solve using Greedy approach
+    // Measure time taken by Greedy approach
+    clock_t startGreedy = clock();
     int greedyResult = knapsackGreedy(items, n, capacity);
-    printf("Total value with Greedy approach: %d\n", greedyResult);
+    clock_t endGreedy = clock();
+    double timeGreedy = ((double)(endGreedy - startGreedy)) / CLOCKS_PER_SEC;
 
-    // Solve using Dynamic Programming approach
+    // Measure time taken by Dynamic Programming approach
+    clock_t startDP = clock();
     int dpResult = knapsackDP(items, n, capacity);
+    clock_t endDP = clock();
+    double timeDP = ((double)(endDP - startDP)) / CLOCKS_PER_SEC;
+
+    // Output results
+    printf("Total value with Greedy approach: %d\n", greedyResult);
+    printf("Time taken by Greedy approach: %.6f seconds\n", timeGreedy);
+
     printf("Total value with Dynamic Programming approach: %d\n", dpResult);
+    printf("Time taken by Dynamic Programming approach: %.6f seconds\n", timeDP);
 
     return 0;
 }
