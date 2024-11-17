@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 // Define an Item structure
 typedef struct {
@@ -98,35 +99,41 @@ int knapsackBranchAndBound(Item items[], int n, int capacity) {
 }
 
 int main() {
-    int n, capacity;
+    int n = 4, capacity = 5; // Predefined input
+    Item items[] = {
+        {2, 12},
+        {1, 10},
+        {3, 20},
+        {2, 15}
+    };
     
-    printf("Enter the number of items: ");
-    scanf("%d", &n);
-    
-    Item items[n];
-    printf("Enter the weight and value of each item:\n");
-    for (int i = 0; i < n; i++) {
-        printf("Item %d - Weight: ", i + 1);
-        scanf("%d", &items[i].weight);
-        printf("Item %d - Value: ", i + 1);
-        scanf("%d", &items[i].value);
-    }
-    
-    printf("Enter the capacity of the knapsack: ");
-    scanf("%d", &capacity);
-    
-    // Dynamic Programming
+    // Time measurement for Dynamic Programming
+    clock_t start, end;
+    double time_taken;
+
+    start = clock();
     int dpResult = knapsackDP(items, n, capacity);
+    end = clock();
+    time_taken = ((double)end - start) / CLOCKS_PER_SEC;
     printf("Max value (Dynamic Programming): %d\n", dpResult);
+    printf("Time taken (Dynamic Programming): %f seconds\n", time_taken);
     
-    // Backtracking
+    // Time measurement for Backtracking
+    start = clock();
     int backtrackResult = 0;
     knapsackBacktracking(items, n, capacity, 0, 0, 0, &backtrackResult);
+    end = clock();
+    time_taken = ((double)end - start) / CLOCKS_PER_SEC;
     printf("Max value (Backtracking): %d\n", backtrackResult);
+    printf("Time taken (Backtracking): %f seconds\n", time_taken);
     
-    // Branch and Bound
+    // Time measurement for Branch and Bound
+    start = clock();
     int branchBoundResult = knapsackBranchAndBound(items, n, capacity);
+    end = clock();
+    time_taken = ((double)end - start) / CLOCKS_PER_SEC;
     printf("Max value (Branch and Bound): %d\n", branchBoundResult);
+    printf("Time taken (Branch and Bound): %f seconds\n", time_taken);
     
     return 0;
 }
