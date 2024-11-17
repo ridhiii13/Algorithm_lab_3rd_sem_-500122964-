@@ -47,6 +47,7 @@ int main() {
     printf("Enter the number of activities: ");
     scanf("%d", &n);
     
+    // Dynamically allocate memory for the activities array based on input size
     Activity activities[n];
     
     // Input start and finish times of each activity
