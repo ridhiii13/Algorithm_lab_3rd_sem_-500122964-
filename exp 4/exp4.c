@@ -43,22 +43,18 @@ void activitySelection(Activity activities[], int n) {
 }
 
 int main() {
-    int n;
-    printf("Enter the number of activities: ");
-    scanf("%d", &n);
+    // The input data as per your request:
+    int n = 6;
     
-    // Dynamically allocate memory for the activities array based on input size
-    Activity activities[n];
-    
-    // Input start and finish times of each activity
-    printf("Enter start and finish times of each activity:\n");
-    for (int i = 0; i < n; i++) {
-        printf("Activity %d:\n", i + 1);
-        printf("Start time: ");
-        scanf("%d", &activities[i].start);
-        printf("Finish time: ");
-        scanf("%d", &activities[i].finish);
-    }
+    // Initialize the activities array with given start and finish times
+    Activity activities[6] = {
+        {1, 3}, // Activity 1
+        {2, 4}, // Activity 2
+        {4, 6}, // Activity 3
+        {5, 7}, // Activity 4
+        {7, 9}, // Activity 5
+        {3, 6}  // Activity 6
+    };
     
     // Perform activity selection
     activitySelection(activities, n);
