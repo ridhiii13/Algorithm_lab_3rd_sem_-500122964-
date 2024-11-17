@@ -3,129 +3,138 @@
 #include <limits.h>
 #include <time.h>
 
-#define V 5  // Number of vertices in the graph
 #define INF INT_MAX
 
-void dijkstra(int graph[V][V], int src);
-void bellmanFord(int graph[V][V], int src);
+// Structure to represent an edge in a graph
+struct Edge {
+    int src, dest, weight;
+};
 
-int minDistance(int dist[], int sptSet[]);
-void printSolution(int dist[], int n);
+// Structure to represent a graph with V vertices and E edges
+struct Graph {
+    int V, E;
+    struct Edge* edge;
+};
 
-int main() {
-    // Adjacency matrix representation of a weighted graph
-    int graph[V][V] = {
-        {0, 4, INF, INF, INF},
-        {4, 0, 8, INF, INF},
-        {INF, 8, 0, 7, INF},
-        {INF, INF, 7, 0, 9},
-        {INF, INF, INF, 9, 0}
-    };
-
-    int src = 0;  // Starting vertex
-
-    // Measure performance of Dijkstra's Algorithm
-    clock_t start = clock();
-    printf("Dijkstra's Algorithm:\n");
-    dijkstra(graph, src);
-    clock_t end = clock();
-    double time_dijkstra = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Time taken by Dijkstra's Algorithm: %.6f seconds\n\n", time_dijkstra);
-
-    // Measure performance of Bellman-Ford Algorithm
-    start = clock();
-    printf("Bellman-Ford Algorithm:\n");
-    bellmanFord(graph, src);
-    end = clock();
-    double time_bellman = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Time taken by Bellman-Ford Algorithm: %.6f seconds\n", time_bellman);
-
-    return 0;
+// Create a graph with V vertices and E edges
+struct Graph* createGraph(int V, int E) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->E = E;
+    graph->edge = (struct Edge*)malloc(E * sizeof(struct Edge));
+    return graph;
 }
 
-// Function for Dijkstra's Algorithm
-void dijkstra(int graph[V][V], int src) {
-    int dist[V];   // Distance array to hold the shortest path tree
-    int sptSet[V]; // Shortest path tree set
+// Bellman-Ford Algorithm
+void BellmanFord(struct Graph* graph, int src) {
+    int V = graph->V;
+    int E = graph->E;
+    int dist[V];
 
-    // Initialize all distances to infinity and sptSet[] as false
+    // Initialize distances
     for (int i = 0; i < V; i++) {
         dist[i] = INF;
-        sptSet[i] = 0;
     }
     dist[src] = 0;
 
-    // Find shortest path for all vertices
-    for (int count = 0; count < V - 1; count++) {
-        int u = minDistance(dist, sptSet);
-        sptSet[u] = 1;
+    // Relax edges |V| - 1 times
+    for (int i = 1; i <= V - 1; i++) {
+        for (int j = 0; j < E; j++) {
+            int u = graph->edge[j].src;
+            int v = graph->edge[j].dest;
+            int weight = graph->edge[j].weight;
+            if (dist[u] != INF && dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+            }
+        }
+    }
 
-        // Update distance value of adjacent vertices
+    // Print distances
+    printf("Bellman-Ford distances from source %d:\n", src);
+    for (int i = 0; i < V; i++) {
+        if (dist[i] == INF)
+            printf("Vertex %d: INF\n", i);
+        else
+            printf("Vertex %d: %d\n", i, dist[i]);
+    }
+}
+
+// Dijkstra’s Algorithm using an adjacency matrix
+void Dijkstra(int graph[100][100], int V, int src) {
+    int dist[V];
+    int visited[V];
+
+    for (int i = 0; i < V; i++) {
+        dist[i] = INF;
+        visited[i] = 0;
+    }
+    dist[src] = 0;
+
+    for (int count = 0; count < V - 1; count++) {
+        int min = INF, min_index;
         for (int v = 0; v < V; v++) {
-            if (!sptSet[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
+            if (!visited[v] && dist[v] <= min) {
+                min = dist[v], min_index = v;
+            }
+        }
+        int u = min_index;
+        visited[u] = 1;
+
+        for (int v = 0; v < V; v++) {
+            if (!visited[v] && graph[u][v] && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
                 dist[v] = dist[u] + graph[u][v];
             }
         }
     }
 
-    printSolution(dist, V);
-}
-
-// Helper function for Dijkstra's Algorithm to find the vertex with minimum distance
-int minDistance(int dist[], int sptSet[]) {
-    int min = INF, min_index;
-    for (int v = 0; v < V; v++) {
-        if (sptSet[v] == 0 && dist[v] <= min) {
-            min = dist[v];
-            min_index = v;
-        }
-    }
-    return min_index;
-}
-
-// Function for Bellman-Ford Algorithm
-void bellmanFord(int graph[V][V], int src) {
-    int dist[V];
-
-    // Initialize distances from src to all other vertices as INFINITE
+    // Print distances
+    printf("Dijkstra distances from source %d:\n", src);
     for (int i = 0; i < V; i++) {
-        dist[i] = INF;
+        if (dist[i] == INF)
+            printf("Vertex %d: INF\n", i);
+        else
+            printf("Vertex %d: %d\n", i, dist[i]);
     }
-    dist[src] = 0;
-
-    // Relax all edges |V| - 1 times
-    for (int i = 1; i < V; i++) {
-        for (int u = 0; u < V; u++) {
-            for (int v = 0; v < V; v++) {
-                if (graph[u][v] != INF && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
-                    dist[v] = dist[u] + graph[u][v];
-                }
-            }
-        }
-    }
-
-    // Check for negative-weight cycles
-    for (int u = 0; u < V; u++) {
-        for (int v = 0; v < V; v++) {
-            if (graph[u][v] != INF && dist[u] != INF && dist[u] + graph[u][v] < dist[v]) {
-                printf("Graph contains negative weight cycle\n");
-                return;
-            }
-        }
-    }
-
-    printSolution(dist, V);
 }
 
-// Function to print the final distances
-void printSolution(int dist[], int n) {
-    printf("Vertex \t Distance from Source\n");
-    for (int i = 0; i < n; i++) {
-        if (dist[i] == INF) {
-            printf("%d \t\t INF\n", i);
-        } else {
-            printf("%d \t\t %d\n", i, dist[i]);
-        }
-    }
-    printf("\n");
+// Main function to compare the two algorithms
+int main() {
+    int V = 5, E = 8;
+    struct Graph* graph = createGraph(V, E);
+
+    // Sample graph with edges for Bellman-Ford
+    graph->edge[0] = (struct Edge){0, 1, 1};
+    graph->edge[1] = (struct Edge){0, 2, 2};
+    graph->edge[2] = (struct Edge){1, 2, 1};
+    graph->edge[3] = (struct Edge){1, 4, 1};
+    graph->edge[4] = (struct Edge){2, 3, 1};
+    graph->edge[5] = (struct Edge){0, 3, 3};
+
+    // Adjacency matrix for Dijkstra
+    int adjMatrix[100][100] = {
+        { 0, 1, 4, 6, 1 }, // Node A (0) connections
+        { 1, 0, 0, 2, 0 }, // Node B (1) connections
+        { 4, 0, 0, 0, 1 }, // Node C (2) connections
+        { 6, 2, 0, 0, 5 }, // Node D (3) connections
+        { 1, 0, 1, 5, 0 } // Node E (4) connections
+    };
+    // Measure Bellman-Ford performance
+    clock_t startBellman = clock();
+    BellmanFord(graph, 0);
+    clock_t endBellman = clock();
+    double timeBellman = ((double)(endBellman - startBellman) * 1000.0) / CLOCKS_PER_SEC;
+
+    // Measure Dijkstra performance
+    clock_t startDijkstra = clock();
+    Dijkstra(adjMatrix, V, 0);
+    clock_t endDijkstra = clock();
+    double timeDijkstra = ((double)(endDijkstra - startDijkstra) * 1000.0) / CLOCKS_PER_SEC;
+
+    // Print performance results
+    printf("\nTime taken by Bellman-Ford: %.2f milliseconds\n", timeBellman);
+    printf("Time taken by Dijkstra: %.2f milliseconds\n", timeDijkstra);
+
+    free(graph->edge);
+    free(graph);
+    return 0;
 }
