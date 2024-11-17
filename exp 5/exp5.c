@@ -1,65 +1,70 @@
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
 
-// Function to find the minimum number of multiplications needed to multiply matrices
-void matrixChainOrder(int p[], int n) {
-    int m[n][n];  // m[i][j] holds the minimum multiplication cost for matrices from i to j
-    int s[n][n];  // s[i][j] holds the index of k at which the optimal split occurs
+// Function to print the optimal parenthesis order
+void printOptimalParenthesis(int i, int j, int n, int* bracket, char* name) {
+    if (i == j) {
+        printf("%c", *name);
+        (*name)++;
+        return;
+    }
 
-    // Initialize the cost of single matrices to zero
+    printf("(");
+
+    // Print the left part of the parenthesis
+    printOptimalParenthesis(i, *((bracket + i * n) + j), n, bracket, name);
+
+    // Print the right part of the parenthesis
+    printOptimalParenthesis(*((bracket + i * n) + j) + 1, j, n, bracket, name);
+
+    printf(")");
+}
+
+// Function to compute the minimum cost of matrix multiplication
+int matrixChainOrder(int p[], int n) {
+    int m[n][n];
+    int bracket[n][n];
+
+    // Cost is zero when multiplying one matrix
     for (int i = 1; i < n; i++) {
         m[i][i] = 0;
     }
 
-    // L is chain length
-    for (int L = 2; L < n; L++) {
-        for (int i = 1; i < n - L + 1; i++) {
-            int j = i + L - 1;
-            m[i][j] = INT_MAX;  // Set initial cost to infinity
-
-            // Find the minimum cost for this split point
+    for (int len = 2; len < n; len++) {
+        for (int i = 1; i < n - len + 1; i++) {
+            int j = i + len - 1;
+            m[i][j] = INT_MAX;
             for (int k = i; k <= j - 1; k++) {
-                int q = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
-                if (q < m[i][j]) {
-                    m[i][j] = q;
-                    s[i][j] = k;  // Record the split point
+                int cost = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+                if (cost < m[i][j]) {
+                    m[i][j] = cost;
+                    bracket[i][j] = k;
                 }
             }
         }
     }
 
-    // Display results
-    printf("Minimum number of multiplications is %d\n", m[1][n - 1]);
-    printf("Optimal Parenthesization:\n");
-    printOptimalParenthesis(1, n - 1, s);
-}
+    char matrixName = 'A';
+    printf("Optimal Parenthesization: ");
+    printOptimalParenthesis(1, n - 1, n, (int*)bracket, &matrixName);
+    printf("\n");
 
-// Recursive function to print the optimal parenthesization
-void printOptimalParenthesis(int i, int j, int s[][20]) {
-    if (i == j) {
-        printf("A%d", i);
-    } else {
-        printf("(");
-        printOptimalParenthesis(i, s[i][j], s);
-        printOptimalParenthesis(s[i][j] + 1, j, s);
-        printf(")");
-    }
+    return m[1][n - 1];
 }
 
 int main() {
-    int n;
+    int arr[] = {5,6,8,4,5};
+    int n = sizeof(arr) / sizeof(arr[0]);
 
-    printf("Enter the number of matrices: ");
-    scanf("%d", &n);
+    clock_t start = clock();
+    int minCost = matrixChainOrder(arr, n);
+    clock_t end = clock();
 
-    int p[n + 1];
-    printf("Enter dimensions of matrices (n+1 numbers):\n");
-    for (int i = 0; i <= n; i++) {
-        printf("Dimension %d: ", i + 1);
-        scanf("%d", &p[i]);
-    }
+    double timeTaken = ((double)(end - start)) * 1000.0 / CLOCKS_PER_SEC;
 
-    matrixChainOrder(p, n + 1);
+    printf("Minimum number of multiplications: %d\n", minCost);
+    printf("Time taken: %.2f milliseconds\n", timeTaken);
 
     return 0;
 }
